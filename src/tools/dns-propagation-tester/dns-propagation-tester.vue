@@ -6,7 +6,6 @@ import { useNetworkUtilsConfig } from '@/tools/network-utils/network-utils-confi
 import { Base64 } from 'js-base64';
 
 const { serverHost, serverAuth, hasFixedConfig } = useNetworkUtilsConfig({
-  toolKey: 'dns-prop',
   urlStorageKey: 'dns-prop:url',
   authStorageKey: 'dns-prop:auth',
 });
@@ -19,13 +18,15 @@ async function api(path: string, params: Record<string, string | number | boolea
 
   const url = `${serverHost.value}${path}?${pathParams.toString()}`;
 
-  const response = await fetch(url,
+  const response = await fetch(
+    url,
     serverAuth.value
       ? {
           method: 'GET',
           headers: { Authorization: `Basic ${Base64.encode(serverAuth.value)}` },
         }
-      : undefined);
+      : undefined,
+  );
 
   if (!response.ok) {
     const text = await response.text();
@@ -84,15 +85,12 @@ const builtinResolvers = [
 ];
 
 interface Resolver {
-  ip: string
-  name: string
+  ip: string;
+  name: string;
 }
 
 const customResolvers = useITStorage<Resolver[]>('dns-prop:cust', []);
-const resolvers = computed(() => [
-  ...builtinResolvers,
-  ...customResolvers.value,
-]);
+const resolvers = computed(() => [...builtinResolvers, ...customResolvers.value]);
 
 const propDomain = useQueryParamOrStorage({ name: 'domain', storageName: 'dns-prop:d', defaultValue: '' });
 const propType = useQueryParamOrStorage({ name: 'type', storageName: 'dns-prop:t', defaultValue: 'A' });
@@ -100,11 +98,11 @@ const propType = useQueryParamOrStorage({ name: 'type', storageName: 'dns-prop:t
 const selectedResolvers = ref<string[]>([]);
 
 interface DNSQueryResult {
-  ok: boolean
-  domain: string
-  record_type: string
-  answers?: string[] | null
-  error?: string | null
+  ok: boolean;
+  domain: string;
+  record_type: string;
+  answers?: string[] | null;
+  error?: string | null;
 }
 type Result = Record<string, { status: 'checking' | 'success' | 'error'; result?: DNSQueryResult }>;
 const propResults = reactive<Result>({});
@@ -129,7 +127,7 @@ function addCustomResolver() {
 }
 
 function removeCustomResolver(ip: string) {
-  customResolvers.value = customResolvers.value.filter(r => r.ip !== ip);
+  customResolvers.value = customResolvers.value.filter((r) => r.ip !== ip);
 }
 
 async function runPropagation() {
@@ -145,30 +143,31 @@ async function runPropagation() {
 
   const allPromises: Promise<void>[] = [];
   for (const ip of selectedResolvers.value) {
-    allPromises.push((async () => {
-      try {
-        const dnsResult = await api('/dns-query', {
-          domain: propDomain.value,
-          record_type: propType.value,
-          resolver_ip: ip,
-        });
-        propResults[ip] = {
-          status: dnsResult.ok ? 'success' : 'error',
-          result: dnsResult,
-        };
-      }
-      catch (err: any) {
-        propResults[ip] = {
-          status: 'error',
-          result: {
-            ok: false,
+    allPromises.push(
+      (async () => {
+        try {
+          const dnsResult = await api('/dns-query', {
             domain: propDomain.value,
             record_type: propType.value,
-            error: err.toString(),
-          },
-        };
-      }
-    })());
+            resolver_ip: ip,
+          });
+          propResults[ip] = {
+            status: dnsResult.ok ? 'success' : 'error',
+            result: dnsResult,
+          };
+        } catch (err: any) {
+          propResults[ip] = {
+            status: 'error',
+            result: {
+              ok: false,
+              domain: propDomain.value,
+              record_type: propType.value,
+              error: err.toString(),
+            },
+          };
+        }
+      })(),
+    );
   }
   Promise.all(allPromises).then(() => {
     loading.value = false;
@@ -179,15 +178,34 @@ async function runPropagation() {
 <template>
   <div>
     <details v-if="!hasFixedConfig" mb-2>
-      <summary>{{ t('tools.dns-propagation-tester.texts.tag-network-utilities-service-configuration-self-hosted') }}</summary>
+      <summary>
+        {{ t('tools.dns-propagation-tester.texts.tag-network-utilities-service-configuration-self-hosted') }}
+      </summary>
       <n-card>
-        <NFormItem :label="t('tools.dns-propagation-tester.texts.label-network-utilities-service-url')" label-placement="top">
-          <NInput v-model:value="serverHost" :placeholder="t('tools.dns-propagation-tester.texts.placeholder-http-localhost-3000')" />
+        <NFormItem
+          :label="t('tools.dns-propagation-tester.texts.label-network-utilities-service-url')"
+          label-placement="top"
+        >
+          <NInput
+            v-model:value="serverHost"
+            :placeholder="t('tools.dns-propagation-tester.texts.placeholder-http-localhost-3000')"
+          />
         </NFormItem>
-        <NFormItem :label="t('tools.dns-propagation-tester.texts.label-basic-authentication')" label-placement="left" label-width="auto">
-          <NInput v-model:value="serverAuth" :placeholder="t('tools.dns-propagation-tester.texts.placeholder-username-password')" />
+        <NFormItem
+          :label="t('tools.dns-propagation-tester.texts.label-basic-authentication')"
+          label-placement="left"
+          label-width="auto"
+        >
+          <NInput
+            v-model:value="serverAuth"
+            :placeholder="t('tools.dns-propagation-tester.texts.placeholder-username-password')"
+          />
         </NFormItem>
-        <n-p>{{ t('tools.dns-propagation-tester.texts.tag-you-must-self-host-network-utilities-service-see') }}<c-link href="https://github.com/sharevb/network-utils-ws#running-in-docker" target="_blank">{{ t('tools.dns-propagation-tester.texts.tag-network-utilities-service-docker-install') }}</c-link>
+        <n-p
+          >{{ t('tools.dns-propagation-tester.texts.tag-you-must-self-host-network-utilities-service-see')
+          }}<c-link href="https://github.com/sharevb/network-utils-ws#running-in-docker" target="_blank">{{
+            t('tools.dns-propagation-tester.texts.tag-network-utilities-service-docker-install')
+          }}</c-link>
         </n-p>
       </n-card>
     </details>
@@ -195,26 +213,38 @@ async function runPropagation() {
     <n-tabs type="line" animated>
       <n-tab-pane name="propagation" :tab="t('tools.dns-propagation-tester.texts.tab-dns-propagation')">
         <n-form>
-          <c-input-text v-model:value="propDomain" :label="t('tools.dns-propagation-tester.texts.label-domain')" label-position="left" :placeholder="t('tools.dns-propagation-tester.texts.placeholder-example-com')" mb-1 />
+          <c-input-text
+            v-model:value="propDomain"
+            :label="t('tools.dns-propagation-tester.texts.label-domain')"
+            label-position="left"
+            :placeholder="t('tools.dns-propagation-tester.texts.placeholder-example-com')"
+            mb-1
+          />
           <c-select
-            v-model:value="propType" :label="t('tools.dns-propagation-tester.texts.label-record-type')"
+            v-model:value="propType"
+            :label="t('tools.dns-propagation-tester.texts.label-record-type')"
             mb-1
             label-position="left"
-            :options="['A', 'AAAA', 'CNAME', 'MX', 'NS', 'TXT', 'SRV', 'SOA', 'CAA', 'DS', 'DNSKEY'].map(x => ({ label: x, value: x }))"
+            :options="
+              ['A', 'AAAA', 'CNAME', 'MX', 'NS', 'TXT', 'SRV', 'SOA', 'CAA', 'DS', 'DNSKEY'].map((x) => ({
+                label: x,
+                value: x,
+              }))
+            "
           />
 
           <n-card :title="t('tools.dns-propagation-tester.texts.title-resolvers-to-check')" mb-2>
             <n-space justify="center" mb-1 gap-1>
-              <n-button size="tiny" @click="selectedResolvers = resolvers.map(r => r.ip)">{{ t('tools.dns-propagation-tester.texts.tag-select-all') }}</n-button>
-              <n-button size="tiny" @click="selectedResolvers = []">{{ t('tools.dns-propagation-tester.texts.tag-deselect-all') }}</n-button>
+              <n-button size="tiny" @click="selectedResolvers = resolvers.map((r) => r.ip)">{{
+                t('tools.dns-propagation-tester.texts.tag-select-all')
+              }}</n-button>
+              <n-button size="tiny" @click="selectedResolvers = []">{{
+                t('tools.dns-propagation-tester.texts.tag-deselect-all')
+              }}</n-button>
             </n-space>
             <n-checkbox-group v-model:value="selectedResolvers">
               <n-space wrap>
-                <n-checkbox
-                  v-for="r in resolvers"
-                  :key="r.ip"
-                  :value="r.ip"
-                >
+                <n-checkbox v-for="r in resolvers" :key="r.ip" :value="r.ip">
                   {{ r.name }} <em>({{ r.ip }})</em>
                 </n-checkbox>
               </n-space>
@@ -222,7 +252,13 @@ async function runPropagation() {
           </n-card>
 
           <n-space justify="center" mb-1>
-            <n-button type="primary" :disabled="!propDomain || !propType || !selectedResolvers.length || loading" :loading="loading" @click="runPropagation">{{ t('tools.dns-propagation-tester.texts.tag-check-propagation') }}</n-button>
+            <n-button
+              type="primary"
+              :disabled="!propDomain || !propType || !selectedResolvers.length || loading"
+              :loading="loading"
+              @click="runPropagation"
+              >{{ t('tools.dns-propagation-tester.texts.tag-check-propagation') }}</n-button
+            >
           </n-space>
         </n-form>
 
@@ -238,7 +274,7 @@ async function runPropagation() {
             </thead>
             <tbody>
               <tr v-for="(res, ip) in propResults" :key="ip">
-                <td>{{ resolvers.find(r => r.ip === ip)?.name || ip }}</td>
+                <td>{{ resolvers.find((r) => r.ip === ip)?.name || ip }}</td>
                 <td>{{ ip }}</td>
                 <td>
                   <n-tag :type="res.status === 'success' ? 'success' : res.status === 'error' ? 'error' : 'default'">
@@ -246,10 +282,12 @@ async function runPropagation() {
                   </n-tag>
                 </td>
                 <td>
-                  <div v-if="res.result?.error" style="color: red;">
+                  <div v-if="res.result?.error" style="color: red">
                     {{ res.result.error }}
                   </div>
-                  <div v-else-if="res.status === 'checking'">{{ t('tools.dns-propagation-tester.texts.tag-checking') }}</div>
+                  <div v-else-if="res.status === 'checking'">
+                    {{ t('tools.dns-propagation-tester.texts.tag-checking') }}
+                  </div>
                   <ul v-else-if="res.result?.answers">
                     <li v-for="(a, idx) in res.result.answers" :key="idx">
                       {{ a }}
@@ -265,22 +303,40 @@ async function runPropagation() {
 
       <n-tab-pane name="custom-resolvers" :tab="t('tools.dns-propagation-tester.texts.tab-custom-resolvers')">
         <n-card :title="t('tools.dns-propagation-tester.texts.title-add-custom-resolver')">
-          <c-input-text v-model:value="newResolverName" :label="t('tools.dns-propagation-tester.texts.label-resolver-name')" label-width="120px" label-position="left" :placeholder="t('tools.dns-propagation-tester.texts.placeholder-resolver-name-e-g-my-dns')" mb-1 />
-          <c-input-text v-model:value="newResolverIp" :label="t('tools.dns-propagation-tester.texts.label-resolver-ip')" label-width="120px" label-position="left" :placeholder="t('tools.dns-propagation-tester.texts.placeholder-resolver-ip-e-g-10-0-0-1')" mb-1 />
+          <c-input-text
+            v-model:value="newResolverName"
+            :label="t('tools.dns-propagation-tester.texts.label-resolver-name')"
+            label-width="120px"
+            label-position="left"
+            :placeholder="t('tools.dns-propagation-tester.texts.placeholder-resolver-name-e-g-my-dns')"
+            mb-1
+          />
+          <c-input-text
+            v-model:value="newResolverIp"
+            :label="t('tools.dns-propagation-tester.texts.label-resolver-ip')"
+            label-width="120px"
+            label-position="left"
+            :placeholder="t('tools.dns-propagation-tester.texts.placeholder-resolver-ip-e-g-10-0-0-1')"
+            mb-1
+          />
 
           <n-space justify="center" mb-1>
-            <n-button type="primary" @click="addCustomResolver">{{ t('tools.dns-propagation-tester.texts.tag-add-resolver') }}</n-button>
+            <n-button type="primary" @click="addCustomResolver">{{
+              t('tools.dns-propagation-tester.texts.tag-add-resolver')
+            }}</n-button>
           </n-space>
         </n-card>
 
-        <n-card v-if="customResolvers.length" :title="t('tools.dns-propagation-tester.texts.title-your-custom-resolvers')">
-          <div
-            v-for="r in customResolvers"
-            :key="r.ip"
-          >
-            <div style="display:flex; justify-content:space-between; align-items:center;">
+        <n-card
+          v-if="customResolvers.length"
+          :title="t('tools.dns-propagation-tester.texts.title-your-custom-resolvers')"
+        >
+          <div v-for="r in customResolvers" :key="r.ip">
+            <div style="display: flex; justify-content: space-between; align-items: center">
               <div>{{ r.name }} — {{ r.ip }}</div>
-              <n-button type="error" size="tiny" @click="removeCustomResolver(r.ip)">{{ t('tools.dns-propagation-tester.texts.tag-remove') }}</n-button>
+              <n-button type="error" size="tiny" @click="removeCustomResolver(r.ip)">{{
+                t('tools.dns-propagation-tester.texts.tag-remove')
+              }}</n-button>
             </div>
           </div>
         </n-card>

@@ -5,7 +5,6 @@ import { useNetworkUtilsConfig } from '@/tools/network-utils/network-utils-confi
 import { Base64 } from 'js-base64';
 
 const { serverHost, serverAuth, hasFixedConfig } = useNetworkUtilsConfig({
-  toolKey: 'https-tester',
   urlStorageKey: 'https-tester:url',
   authStorageKey: 'https-tester:auth',
 });
@@ -136,22 +135,50 @@ const labelProps = {
       <summary>{{ t('tools.https-tester.texts.tag-network-utilities-service-configuration-self-hosted') }}</summary>
       <n-card>
         <NFormItem :label="t('tools.https-tester.texts.label-network-utilities-service-url')" label-placement="top">
-          <NInput v-model:value="serverHost" :placeholder="t('tools.https-tester.texts.placeholder-http-localhost-3000')" />
+          <NInput
+            v-model:value="serverHost"
+            :placeholder="t('tools.https-tester.texts.placeholder-http-localhost-3000')"
+          />
         </NFormItem>
-        <NFormItem :label="t('tools.https-tester.texts.label-basic-authentication')" label-placement="left" label-width="auto">
-          <NInput v-model:value="serverAuth" :placeholder="t('tools.https-tester.texts.placeholder-username-password')" />
+        <NFormItem
+          :label="t('tools.https-tester.texts.label-basic-authentication')"
+          label-placement="left"
+          label-width="auto"
+        >
+          <NInput
+            v-model:value="serverAuth"
+            :placeholder="t('tools.https-tester.texts.placeholder-username-password')"
+          />
         </NFormItem>
-        <n-p>{{ t('tools.https-tester.texts.tag-you-must-self-host-network-utilities-service-see') }}<c-link href="https://github.com/sharevb/network-utils-ws#running-in-docker" target="_blank">{{ t('tools.https-tester.texts.tag-network-utilities-service-docker-install') }}</c-link>
+        <n-p
+          >{{ t('tools.https-tester.texts.tag-you-must-self-host-network-utilities-service-see')
+          }}<c-link href="https://github.com/sharevb/network-utils-ws#running-in-docker" target="_blank">{{
+            t('tools.https-tester.texts.tag-network-utilities-service-docker-install')
+          }}</c-link>
         </n-p>
       </n-card>
     </details>
 
     <n-tabs type="line" animated>
       <n-tab-pane name="cert" :tab="t('tools.https-tester.texts.tab-certificate')">
-        <c-input-text v-model:value="certHost" :label="t('tools.https-tester.texts.label-host')" v-bind="labelProps" :placeholder="t('tools.https-tester.texts.placeholder-example-com')" mb-1 />
-        <c-input-text v-model:value="certPort" :label="t('tools.https-tester.texts.label-port')" v-bind="labelProps" :placeholder="t('tools.https-tester.texts.placeholder-443')" mb-1 />
+        <c-input-text
+          v-model:value="certHost"
+          :label="t('tools.https-tester.texts.label-host')"
+          v-bind="labelProps"
+          :placeholder="t('tools.https-tester.texts.placeholder-example-com')"
+          mb-1
+        />
+        <c-input-text
+          v-model:value="certPort"
+          :label="t('tools.https-tester.texts.label-port')"
+          v-bind="labelProps"
+          :placeholder="t('tools.https-tester.texts.placeholder-443')"
+          mb-1
+        />
         <div mb-2 flex justify-center>
-          <n-button type="primary" :loading="loading" @click="runCertificate">{{ t('tools.https-tester.texts.tag-check-certificate') }}</n-button>
+          <n-button type="primary" :loading="loading" @click="runCertificate">{{
+            t('tools.https-tester.texts.tag-check-certificate')
+          }}</n-button>
         </div>
 
         <n-card v-if="certResult" :title="t('tools.https-tester.texts.title-result')">
@@ -161,12 +188,32 @@ const labelProps = {
             </n-tag>
           </n-space>
 
-          <input-copyable :label="t('tools.https-tester.texts.label-hostname')" v-bind="labelProps" :value="certResult.hostname" mb-1 />
-          <input-copyable :label="t('tools.https-tester.texts.label-port')" v-bind="labelProps" :value="certResult.port" mb-1 />
+          <input-copyable
+            :label="t('tools.https-tester.texts.label-hostname')"
+            v-bind="labelProps"
+            :value="certResult.hostname"
+            mb-1
+          />
+          <input-copyable
+            :label="t('tools.https-tester.texts.label-port')"
+            v-bind="labelProps"
+            :value="certResult.port"
+            mb-1
+          />
 
-          <input-copyable :label="t('tools.https-tester.texts.label-not-before')" v-bind="labelProps" :value="formatDate(certResult.not_before)" mb-1 />
+          <input-copyable
+            :label="t('tools.https-tester.texts.label-not-before')"
+            v-bind="labelProps"
+            :value="formatDate(certResult.not_before)"
+            mb-1
+          />
 
-          <input-copyable :label="t('tools.https-tester.texts.label-not-after')" v-bind="labelProps" :value="formatDate(certResult.not_after)" mb-1 />
+          <input-copyable
+            :label="t('tools.https-tester.texts.label-not-after')"
+            v-bind="labelProps"
+            :value="formatDate(certResult.not_after)"
+            mb-1
+          />
 
           <input-copyable
             :label="t('tools.https-tester.texts.label-days-until-expiry')"
@@ -175,9 +222,19 @@ const labelProps = {
             mb-1
           />
 
-          <input-copyable :label="t('tools.https-tester.texts.label-subject')" v-bind="labelProps" :value="prettyJSON(certResult.subject)" mb-1 />
+          <input-copyable
+            :label="t('tools.https-tester.texts.label-subject')"
+            v-bind="labelProps"
+            :value="prettyJSON(certResult.subject)"
+            mb-1
+          />
 
-          <input-copyable :label="t('tools.https-tester.texts.label-issuer')" v-bind="labelProps" :value="prettyJSON(certResult.issuer)" mb-1 />
+          <input-copyable
+            :label="t('tools.https-tester.texts.label-issuer')"
+            v-bind="labelProps"
+            :value="prettyJSON(certResult.issuer)"
+            mb-1
+          />
 
           <input-copyable
             v-for="(san, index) in certResult.san"
@@ -200,9 +257,17 @@ const labelProps = {
 
       <!-- HSTS -->
       <n-tab-pane name="hsts" :tab="t('tools.https-tester.texts.tab-hsts')">
-        <c-input-text v-model:value="hstsUrl" :label="t('tools.https-tester.texts.label-url')" v-bind="labelProps" :placeholder="t('tools.https-tester.texts.placeholder-https-example-com')" mb-1 />
+        <c-input-text
+          v-model:value="hstsUrl"
+          :label="t('tools.https-tester.texts.label-url')"
+          v-bind="labelProps"
+          :placeholder="t('tools.https-tester.texts.placeholder-https-example-com')"
+          mb-1
+        />
         <div mb-2 flex justify-center>
-          <n-button type="primary" :loading="loading" @click="runHsts">{{ t('tools.https-tester.texts.tag-check-hsts') }}</n-button>
+          <n-button type="primary" :loading="loading" @click="runHsts">{{
+            t('tools.https-tester.texts.tag-check-hsts')
+          }}</n-button>
         </div>
 
         <n-card v-if="hstsResult" :title="t('tools.https-tester.texts.title-result')">
@@ -212,7 +277,12 @@ const labelProps = {
             </n-tag>
           </n-space>
 
-          <input-copyable :label="t('tools.https-tester.texts.label-url')" v-bind="labelProps" :value="hstsResult.url" mb-1 />
+          <input-copyable
+            :label="t('tools.https-tester.texts.label-url')"
+            v-bind="labelProps"
+            :value="hstsResult.url"
+            mb-1
+          />
 
           <input-copyable
             :label="t('tools.https-tester.texts.label-hsts-present')"
@@ -236,7 +306,12 @@ const labelProps = {
             mb-1
           />
 
-          <input-copyable :label="t('tools.https-tester.texts.label-preload')" v-bind="labelProps" :value="hstsResult.preload ? 'Yes' : 'No'" mb-1 />
+          <input-copyable
+            :label="t('tools.https-tester.texts.label-preload')"
+            v-bind="labelProps"
+            :value="hstsResult.preload ? 'Yes' : 'No'"
+            mb-1
+          />
 
           <input-copyable
             v-if="hstsResult.raw_header"
@@ -267,7 +342,9 @@ const labelProps = {
             mb-1
           />
           <div mb-2 flex justify-center>
-            <n-button type="primary" :loading="loading" @click="runRedirect">{{ t('tools.https-tester.texts.tag-check-redirect') }}</n-button>
+            <n-button type="primary" :loading="loading" @click="runRedirect">{{
+              t('tools.https-tester.texts.tag-check-redirect')
+            }}</n-button>
           </div>
         </n-form>
 
@@ -278,7 +355,12 @@ const labelProps = {
             </n-tag>
           </n-space>
 
-          <input-copyable :label="t('tools.https-tester.texts.label-http-url')" v-bind="labelProps" :value="redirectResult.http_url" mb-1 />
+          <input-copyable
+            :label="t('tools.https-tester.texts.label-http-url')"
+            v-bind="labelProps"
+            :value="redirectResult.http_url"
+            mb-1
+          />
 
           <input-copyable
             :label="t('tools.https-tester.texts.label-redirected')"
@@ -287,9 +369,19 @@ const labelProps = {
             mb-1
           />
 
-          <input-copyable :label="t('tools.https-tester.texts.label-final-url')" v-bind="labelProps" :value="redirectResult.final_url" mb-1 />
+          <input-copyable
+            :label="t('tools.https-tester.texts.label-final-url')"
+            v-bind="labelProps"
+            :value="redirectResult.final_url"
+            mb-1
+          />
 
-          <input-copyable :label="t('tools.https-tester.texts.label-status-code')" v-bind="labelProps" :value="String(redirectResult.status_code)" mb-1 />
+          <input-copyable
+            :label="t('tools.https-tester.texts.label-status-code')"
+            v-bind="labelProps"
+            :value="String(redirectResult.status_code)"
+            mb-1
+          />
 
           <input-copyable
             v-if="redirectResult.redirect_chain"

@@ -7,7 +7,6 @@ import { Base64 } from 'js-base64';
 const { t } = useI18n();
 
 const { serverHost, serverAuth, hasFixedConfig } = useNetworkUtilsConfig({
-  toolKey: 'ping',
   urlStorageKey: 'ping:url',
   authStorageKey: 'ping:auth',
 });

@@ -1,13 +1,23 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import { useITStorage } from '@/composable/queryParams';
+import { useNetworkUtilsConfig } from '../network-utils/network-utils-config';
+import { Base64 } from 'js-base64';
 
 const { t } = useI18n();
 const inputUrls = ref('');
 const results = ref<{ short: string; expanded: string | null; ok: boolean; status: string }[]>([]);
 const error = ref('');
 const loading = ref(false);
-const corsAnywhereUrl = useITStorage('short-urls-expander:cors-anywhere-url', '//cors.outils-libre.org');
+
+const {
+  serverHost: corsAnywhereUrl,
+  serverAuth,
+  hasFixedConfig,
+} = useNetworkUtilsConfig({
+  urlStorageKey: 'short-urls-expander:cors-anywhere-url',
+  authStorageKey: 'short-urls-expander:auth',
+  defaultUrl: '//cors.outils-libre.org',
+});
 
 function expandSingleUrl(
   url: string,
@@ -17,6 +27,9 @@ function expandSingleUrl(
       const corsUrl = `${corsAnywhereUrl.value.replace(/\/+$/g, '')}/${url}`;
       const xhr = new XMLHttpRequest();
       xhr.open('HEAD', corsUrl, true);
+      if (serverAuth.value) {
+        xhr.setRequestHeader('Authorization', `Basic ${Base64.encode(serverAuth.value)}`);
+      }
       xhr.onreadystatechange = function () {
         if (xhr.readyState === xhr.DONE) {
           // In browsers, xhr.responseURL gives the final resolved URL after redirects
@@ -95,7 +108,7 @@ function downloadCsv() {
 <template>
   <div>
     <NSpace vertical>
-      <details>
+      <details v-if="!hasFixedConfig">
         <summary>{{ t('tools.short-urls-expander.texts.cors-anywhere-configuration') }}</summary>
         <n-card>
           <c-input-text
@@ -105,6 +118,16 @@ function downloadCsv() {
             :placeholder="t('tools.short-urls-expander.texts.put-your-cors-anywhere-instance-url')"
             mb-1
           />
+          <NFormItem
+            :label="t('tools.https-tester.texts.label-basic-authentication')"
+            label-placement="left"
+            label-width="auto"
+          >
+            <NInput
+              v-model:value="serverAuth"
+              :placeholder="t('tools.https-tester.texts.placeholder-username-password')"
+            />
+          </NFormItem>
           <n-p>
             {{
               t(

@@ -6,7 +6,6 @@ import { Base64 } from 'js-base64';
 import { isIP } from 'is-ip';
 
 const { serverHost, serverAuth, hasFixedConfig } = useNetworkUtilsConfig({
-  toolKey: 'dns-tester',
   urlStorageKey: 'dns-tester:url',
   authStorageKey: 'dns-tester:auth',
 });
@@ -24,13 +23,15 @@ async function api(path: string, params: Record<string, string | number | boolea
 
     const url = `${serverHost.value}${path}?${pathParams.toString()}`;
 
-    const response = await fetch(url,
+    const response = await fetch(
+      url,
       serverAuth.value
         ? {
             method: 'GET',
             headers: { Authorization: `Basic ${Base64.encode(serverAuth.value)}` },
           }
-        : undefined);
+        : undefined,
+    );
 
     if (!response.ok) {
       const text = await response.text();
@@ -38,11 +39,9 @@ async function api(path: string, params: Record<string, string | number | boolea
     }
 
     return await response.json();
-  }
-  catch (err: any) {
+  } catch (err: any) {
     error.value = err.toString();
-  }
-  finally {
+  } finally {
     loading.value = false;
   }
 }
@@ -50,51 +49,50 @@ async function api(path: string, params: Record<string, string | number | boolea
 type AnyDict = Record<string, any>;
 
 interface DNSQueryResult {
-  ok: boolean
-  domain: string
-  record_type: string
-  answers?: string[] | null
-  error?: string | null
+  ok: boolean;
+  domain: string;
+  record_type: string;
+  answers?: string[] | null;
+  error?: string | null;
 }
 
 interface WhoisResult {
-  ok: boolean
-  domain: string
-  raw?: string | null
-  parsed?: AnyDict | null
-  error?: string | null
+  ok: boolean;
+  domain: string;
+  raw?: string | null;
+  parsed?: AnyDict | null;
+  error?: string | null;
 }
 
 interface DNSSECResult {
-  ok: boolean
-  domain: string
-  validated: boolean
-  dnskey?: string | null
-  rrsig?: string | null
-  error?: string | null
+  ok: boolean;
+  domain: string;
+  validated: boolean;
+  dnskey?: string | null;
+  rrsig?: string | null;
+  error?: string | null;
 }
 
 interface ReverseDNSResult {
-  ok: boolean
-  ip: string
-  ptr?: string | null
-  error?: string | null
+  ok: boolean;
+  ip: string;
+  ptr?: string | null;
+  error?: string | null;
 }
 
 interface AXFRResult {
-  ok: boolean
-  domain: string
-  soa?: string | null
-  axfr_allowed: boolean
-  records?: string[] | null
-  error?: string | null
+  ok: boolean;
+  domain: string;
+  soa?: string | null;
+  axfr_allowed: boolean;
+  records?: string[] | null;
+  error?: string | null;
 }
 
 function prettyJSON(value: unknown): string {
   try {
     return JSON.stringify(value, null, 2);
-  }
-  catch {
+  } catch {
     return String(value);
   }
 }
@@ -192,7 +190,9 @@ const resolverOptions = [
 
 const resolverIP = ref('');
 const customResolverIP = ref('');
-const effectiveResolverIP = computed(() => resolverIP.value === '__custom__' ? customResolverIP.value.trim() : resolverIP.value);
+const effectiveResolverIP = computed(() =>
+  resolverIP.value === '__custom__' ? customResolverIP.value.trim() : resolverIP.value,
+);
 const customResolverIpError = computed(() => {
   if (resolverIP.value !== '__custom__' || !customResolverIP.value.trim()) {
     return '';
@@ -200,7 +200,9 @@ const customResolverIpError = computed(() => {
 
   return isIP(customResolverIP.value.trim()) ? '' : 'Please enter a valid IPv4 or IPv6 address.';
 });
-const canRunWithSelectedResolver = computed(() => resolverIP.value !== '__custom__' || customResolverIpError.value === '');
+const canRunWithSelectedResolver = computed(
+  () => resolverIP.value !== '__custom__' || customResolverIpError.value === '',
+);
 
 const dnsDomain = ref('');
 const dnsType = ref('A');
@@ -258,23 +260,34 @@ const labelProps = {
 </script>
 
 <template>
-  <div style="min-height: 80vh;">
+  <div style="min-height: 80vh">
     <details v-if="!hasFixedConfig" mb-2>
       <summary>{{ t('tools.dns-tester.texts.tag-network-utilities-service-configuration-self-hosted') }}</summary>
       <n-card>
         <NFormItem :label="t('tools.dns-tester.texts.label-network-utilities-service-url')" label-placement="top">
-          <NInput v-model:value="serverHost" :placeholder="t('tools.dns-tester.texts.placeholder-http-localhost-3000')" />
+          <NInput
+            v-model:value="serverHost"
+            :placeholder="t('tools.dns-tester.texts.placeholder-http-localhost-3000')"
+          />
         </NFormItem>
-        <NFormItem :label="t('tools.dns-tester.texts.label-basic-authentication')" label-placement="left" label-width="auto">
+        <NFormItem
+          :label="t('tools.dns-tester.texts.label-basic-authentication')"
+          label-placement="left"
+          label-width="auto"
+        >
           <NInput v-model:value="serverAuth" :placeholder="t('tools.dns-tester.texts.placeholder-username-password')" />
         </NFormItem>
-        <n-p>{{ t('tools.dns-tester.texts.tag-you-must-self-host-network-utilities-service-see') }}<c-link href="https://github.com/sharevb/network-utils-ws#running-in-docker" target="_blank">{{ t('tools.dns-tester.texts.tag-network-utilities-service-docker-install') }}</c-link>
+        <n-p
+          >{{ t('tools.dns-tester.texts.tag-you-must-self-host-network-utilities-service-see')
+          }}<c-link href="https://github.com/sharevb/network-utils-ws#running-in-docker" target="_blank">{{
+            t('tools.dns-tester.texts.tag-network-utilities-service-docker-install')
+          }}</c-link>
         </n-p>
       </n-card>
     </details>
 
     <NFormItem :label="t('tools.dns-tester.texts.label-target-dns-resolver-ip')" label-placement="left">
-      <div style="width: 100%;">
+      <div style="width: 100%">
         <NSelect
           v-model:value="resolverIP"
           :options="resolverOptions"
@@ -288,7 +301,7 @@ const labelProps = {
           v-model:value="customResolverIP"
           :placeholder="t('tools.dns-tester.texts.placeholder-e-g-10-0-0-53')"
         />
-        <div v-if="customResolverIpError" style="margin-top: 6px; color: var(--n-error-color); font-size: 12px;">
+        <div v-if="customResolverIpError" style="margin-top: 6px; color: var(--n-error-color); font-size: 12px">
           {{ customResolverIpError }}
         </div>
       </div>
@@ -296,8 +309,14 @@ const labelProps = {
 
     <n-tabs type="line" animated>
       <!-- DNS QUERY -->
-      <n-tab-pane name="dns" :tab="t('tools.dns-tester.texts.tab-dns-query')" style="min-height: 80vh;">
-        <c-input-text v-model:value="dnsDomain" :label="t('tools.dns-tester.texts.label-domain')" v-bind="labelProps" :placeholder="t('tools.dns-tester.texts.placeholder-example-com')" mb-1 />
+      <n-tab-pane name="dns" :tab="t('tools.dns-tester.texts.tab-dns-query')" style="min-height: 80vh">
+        <c-input-text
+          v-model:value="dnsDomain"
+          :label="t('tools.dns-tester.texts.label-domain')"
+          v-bind="labelProps"
+          :placeholder="t('tools.dns-tester.texts.placeholder-example-com')"
+          mb-1
+        />
         <c-select
           v-model:value="dnsType"
           :label="t('tools.dns-tester.texts.label-dns-record-type')"
@@ -306,7 +325,9 @@ const labelProps = {
           mb-1
         />
         <div mb-2 flex justify-center>
-          <n-button :loading="loading" :disabled="!canRunWithSelectedResolver" @click="runDns">{{ t('tools.dns-tester.texts.tag-query-dns') }}</n-button>
+          <n-button :loading="loading" :disabled="!canRunWithSelectedResolver" @click="runDns">{{
+            t('tools.dns-tester.texts.tag-query-dns')
+          }}</n-button>
         </div>
 
         <n-card v-if="dnsResult" :title="t('tools.dns-tester.texts.title-result')">
@@ -316,23 +337,24 @@ const labelProps = {
             </n-tag>
           </n-space>
 
-          <input-copyable :label="t('tools.dns-tester.texts.label-domain')" v-bind="labelProps" :value="dnsResult.domain" mb-1 />
-          <input-copyable :label="t('tools.dns-tester.texts.label-record-type')" v-bind="labelProps" :value="dnsResult.record_type" mb-1 />
+          <input-copyable
+            :label="t('tools.dns-tester.texts.label-domain')"
+            v-bind="labelProps"
+            :value="dnsResult.domain"
+            mb-1
+          />
+          <input-copyable
+            :label="t('tools.dns-tester.texts.label-record-type')"
+            v-bind="labelProps"
+            :value="dnsResult.record_type"
+            mb-1
+          />
 
           <n-card v-if="dnsResult.answers" :title="t('tools.dns-tester.texts.title-answers')" mb-1>
-            <textarea-copyable
-              v-if="dnsResult.answers"
-              :value="dnsResult.answers.join('\n')"
-              mb-1
-            />
+            <textarea-copyable v-if="dnsResult.answers" :value="dnsResult.answers.join('\n')" mb-1 />
           </n-card>
 
-          <n-alert
-            v-if="dnsResult.error"
-            type="error"
-            :bordered="false"
-            show-icon
-          >
+          <n-alert v-if="dnsResult.error" type="error" :bordered="false" show-icon>
             {{ dnsResult.error }}
           </n-alert>
         </n-card>
@@ -344,9 +366,17 @@ const labelProps = {
 
       <!-- WHOIS -->
       <n-tab-pane name="whois" :tab="t('tools.dns-tester.texts.tab-whois')">
-        <c-input-text v-model:value="whoisDomain" :label="t('tools.dns-tester.texts.label-domain')" v-bind="labelProps" :placeholder="t('tools.dns-tester.texts.placeholder-example-com')" mb-1 />
+        <c-input-text
+          v-model:value="whoisDomain"
+          :label="t('tools.dns-tester.texts.label-domain')"
+          v-bind="labelProps"
+          :placeholder="t('tools.dns-tester.texts.placeholder-example-com')"
+          mb-1
+        />
         <div mb-2 flex justify-center>
-          <n-button type="primary" :loading="loading" @click="runWhois">{{ t('tools.dns-tester.texts.tag-lookup-whois') }}</n-button>
+          <n-button type="primary" :loading="loading" @click="runWhois">{{
+            t('tools.dns-tester.texts.tag-lookup-whois')
+          }}</n-button>
         </div>
 
         <n-card v-if="whoisResult" :title="t('tools.dns-tester.texts.title-result')">
@@ -356,7 +386,12 @@ const labelProps = {
             </n-tag>
           </n-space>
 
-          <input-copyable :label="t('tools.dns-tester.texts.label-domain')" v-bind="labelProps" :value="whoisResult.domain" mb-1 />
+          <input-copyable
+            :label="t('tools.dns-tester.texts.label-domain')"
+            v-bind="labelProps"
+            :value="whoisResult.domain"
+            mb-1
+          />
 
           <textarea-copyable
             v-if="whoisResult.raw"
@@ -373,12 +408,7 @@ const labelProps = {
             mb-1
           />
 
-          <n-alert
-            v-if="whoisResult.error"
-            type="error"
-            :bordered="false"
-            show-icon
-          >
+          <n-alert v-if="whoisResult.error" type="error" :bordered="false" show-icon>
             {{ whoisResult.error }}
           </n-alert>
         </n-card>
@@ -390,9 +420,17 @@ const labelProps = {
 
       <!-- DNSSEC -->
       <n-tab-pane name="dnssec" :tab="t('tools.dns-tester.texts.tab-dnssec-validation')">
-        <c-input-text v-model:value="dnssecDomain" :label="t('tools.dns-tester.texts.label-domain')" v-bind="labelProps" :placeholder="t('tools.dns-tester.texts.placeholder-example-com')" mb-1 />
+        <c-input-text
+          v-model:value="dnssecDomain"
+          :label="t('tools.dns-tester.texts.label-domain')"
+          v-bind="labelProps"
+          :placeholder="t('tools.dns-tester.texts.placeholder-example-com')"
+          mb-1
+        />
         <div mb-2 flex justify-center>
-          <n-button type="primary" :loading="loading" :disabled="!canRunWithSelectedResolver" @click="runDnssec">{{ t('tools.dns-tester.texts.tag-validate-dnssec') }}</n-button>
+          <n-button type="primary" :loading="loading" :disabled="!canRunWithSelectedResolver" @click="runDnssec">{{
+            t('tools.dns-tester.texts.tag-validate-dnssec')
+          }}</n-button>
         </div>
 
         <n-card v-if="dnssecResult" :title="t('tools.dns-tester.texts.title-result')">
@@ -402,7 +440,12 @@ const labelProps = {
             </n-tag>
           </n-space>
 
-          <input-copyable :label="t('tools.dns-tester.texts.label-domain')" v-bind="labelProps" :value="dnssecResult.domain" mb-1 />
+          <input-copyable
+            :label="t('tools.dns-tester.texts.label-domain')"
+            v-bind="labelProps"
+            :value="dnssecResult.domain"
+            mb-1
+          />
 
           <input-copyable
             :label="t('tools.dns-tester.texts.label-validated')"
@@ -427,12 +470,7 @@ const labelProps = {
             mb-1
           />
 
-          <n-alert
-            v-if="dnssecResult.error"
-            type="error"
-            :bordered="false"
-            show-icon
-          >
+          <n-alert v-if="dnssecResult.error" type="error" :bordered="false" show-icon>
             {{ dnssecResult.error }}
           </n-alert>
         </n-card>
@@ -444,9 +482,17 @@ const labelProps = {
 
       <!-- REVERSE DNS -->
       <n-tab-pane name="reverse" :tab="t('tools.dns-tester.texts.tab-reverse-dns-ptr')">
-        <c-input-text v-model:value="reverseIp" :label="t('tools.dns-tester.texts.label-ip-address')" v-bind="labelProps" :placeholder="t('tools.dns-tester.texts.placeholder-8-8-8-8')" mb-1 />
+        <c-input-text
+          v-model:value="reverseIp"
+          :label="t('tools.dns-tester.texts.label-ip-address')"
+          v-bind="labelProps"
+          :placeholder="t('tools.dns-tester.texts.placeholder-8-8-8-8')"
+          mb-1
+        />
         <div mb-2 flex justify-center>
-          <n-button type="primary" :loading="loading" :disabled="!canRunWithSelectedResolver" @click="runReverse">{{ t('tools.dns-tester.texts.tag-reverse-lookup') }}</n-button>
+          <n-button type="primary" :loading="loading" :disabled="!canRunWithSelectedResolver" @click="runReverse">{{
+            t('tools.dns-tester.texts.tag-reverse-lookup')
+          }}</n-button>
         </div>
 
         <n-card v-if="reverseResult" :title="t('tools.dns-tester.texts.title-result')">
@@ -456,7 +502,12 @@ const labelProps = {
             </n-tag>
           </n-space>
 
-          <input-copyable :label="t('tools.dns-tester.texts.label-ip')" v-bind="labelProps" :value="reverseResult.ip" mb-1 />
+          <input-copyable
+            :label="t('tools.dns-tester.texts.label-ip')"
+            v-bind="labelProps"
+            :value="reverseResult.ip"
+            mb-1
+          />
 
           <input-copyable
             v-if="reverseResult.ptr"
@@ -466,12 +517,7 @@ const labelProps = {
             mb-1
           />
 
-          <n-alert
-            v-if="reverseResult.error"
-            type="error"
-            :bordered="false"
-            show-icon
-          >
+          <n-alert v-if="reverseResult.error" type="error" :bordered="false" show-icon>
             {{ reverseResult.error }}
           </n-alert>
         </n-card>
@@ -483,9 +529,17 @@ const labelProps = {
 
       <!-- SOA + AXFR -->
       <n-tab-pane name="axfr" :tab="t('tools.dns-tester.texts.tab-soa-axfr-test')">
-        <c-input-text v-model:value="axfrDomain" :label="t('tools.dns-tester.texts.label-domain')" v-bind="labelProps" :placeholder="t('tools.dns-tester.texts.placeholder-example-com')" mb-1 />
+        <c-input-text
+          v-model:value="axfrDomain"
+          :label="t('tools.dns-tester.texts.label-domain')"
+          v-bind="labelProps"
+          :placeholder="t('tools.dns-tester.texts.placeholder-example-com')"
+          mb-1
+        />
         <div mb-2 flex justify-center>
-          <n-button type="primary" :loading="loading" :disabled="!canRunWithSelectedResolver" @click="runAxfr">{{ t('tools.dns-tester.texts.tag-run-soa-axfr') }}</n-button>
+          <n-button type="primary" :loading="loading" :disabled="!canRunWithSelectedResolver" @click="runAxfr">{{
+            t('tools.dns-tester.texts.tag-run-soa-axfr')
+          }}</n-button>
         </div>
 
         <n-card v-if="axfrResult" :title="t('tools.dns-tester.texts.title-result')">
@@ -495,7 +549,12 @@ const labelProps = {
             </n-tag>
           </n-space>
 
-          <input-copyable :label="t('tools.dns-tester.texts.label-domain')" v-bind="labelProps" :value="axfrResult.domain" mb-1 />
+          <input-copyable
+            :label="t('tools.dns-tester.texts.label-domain')"
+            v-bind="labelProps"
+            :value="axfrResult.domain"
+            mb-1
+          />
 
           <textarea-copyable
             v-if="axfrResult.soa"
@@ -518,12 +577,7 @@ const labelProps = {
             mb-1
           />
 
-          <n-alert
-            v-if="axfrResult.error"
-            type="error"
-            :bordered="false"
-            show-icon
-          >
+          <n-alert v-if="axfrResult.error" type="error" :bordered="false" show-icon>
             {{ axfrResult.error }}
           </n-alert>
         </n-card>
