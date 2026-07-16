@@ -13,8 +13,8 @@ INSTRUCTION arguments
 Specifies the base image.
 
 ```Dockerfile
-FROM ubuntu:20.04
-FROM node:22-alpine
+FROM ubuntu:20.04@sha256:8feb4d8ca5354def3d8fce243717141ce31e2c428701f6682bd2fafe15388214
+FROM node:22-alpine@sha256:16e22a550f3863206a3f701448c45f7912c6896a62de43add43bb9c86130c3e2
 ```
 
 ### `LABEL`
@@ -138,7 +138,7 @@ ONBUILD COPY . /app
 ## 🧪 Example Dockerfile
 
 ```Dockerfile
-FROM node:22-alpine
+FROM node:22-alpine@sha256:16e22a550f3863206a3f701448c45f7912c6896a62de43add43bb9c86130c3e2
 
 LABEL maintainer="guillaume@example.com"
 
@@ -189,7 +189,7 @@ Dockerfile
 
 ```Dockerfile
 # Stage 1: Build
-FROM node:22-alpine AS builder
+FROM node:22-alpine@sha256:16e22a550f3863206a3f701448c45f7912c6896a62de43add43bb9c86130c3e2 AS builder
 WORKDIR /app
 COPY package*.json ./
 RUN npm install
@@ -197,7 +197,7 @@ COPY . .
 RUN npm run build
 
 # Stage 2: Production
-FROM nginx:alpine
+FROM nginx:alpine@sha256:7068961d45b07b2af510ac002e9daa63a1d3eba2111202d6768798690800fffd
 COPY --from=builder /app/dist /usr/share/nginx/html
 ```
 
@@ -206,12 +206,12 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 You can name each stage using `AS <name>` and reference it later with `--from=<name>`.
 
 ```Dockerfile
-FROM golang:1.21 AS build
+FROM golang:1.21@sha256:4746d26432a9117a5f58e95cb9f954ddf0de128e9d5816886514199316e4a2fb AS build
 WORKDIR /src
 COPY . .
 RUN go build -o myapp
 
-FROM alpine:latest
+FROM alpine:latest@sha256:28bd5fe8b56d1bd048e5babf5b10710ebe0bae67db86916198a6eec434943f8b
 COPY --from=build /src/myapp /usr/local/bin/myapp
 ENTRYPOINT ["myapp"]
 ```
@@ -243,7 +243,7 @@ Multistage builds help you avoid bloated images:
 
 ```Dockerfile
 # Build stage
-FROM node:22 AS build
+FROM node:22@sha256:5647be709086c696ff32edaaf1c70cd26d1da6ab2b39c32f3c7b4c4a31957e37 AS build
 WORKDIR /app
 COPY package*.json ./
 RUN npm install
@@ -251,7 +251,7 @@ COPY . .
 RUN npm run build
 
 # Serve stage
-FROM nginx:alpine
+FROM nginx:alpine@sha256:7068961d45b07b2af510ac002e9daa63a1d3eba2111202d6768798690800fffd
 COPY --from=build /app/build /usr/share/nginx/html
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]

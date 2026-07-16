@@ -1,11 +1,11 @@
 services:
   it-tools:
     container_name: it-tools-subfolder
-    image: ghcr.io/sharevb/it-tools:baseurl-it-tools
+    image: ghcr.io/sharevb/it-tools:baseurl-it-tools@sha256:322064fbb6f8f1d3233043075b33a107586d7b247eb62ba2f4c0f85f096b1cac
     pull_policy: always
     restart: unless-stopped
   nginx-reverse-proxy:
-    image: nginx:alpine
+    image: nginx:alpine@sha256:7068961d45b07b2af510ac002e9daa63a1d3eba2111202d6768798690800fffd
     depends_on:
       - it-tools
     volumes:

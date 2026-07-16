@@ -1,6 +1,6 @@
 services:
   it-tools:
-    image: sharevb/it-tools:latest
+    image: sharevb/it-tools:latest@sha256:5715e4abaad14a2c00e3b5b186fa7bff96f0ff9df9905fa68498ae7f8b95e8ac
     pull_policy: always
     restart: unless-stopped
     volumes:
