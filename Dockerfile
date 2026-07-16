@@ -11,7 +11,14 @@ WORKDIR /app
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY patches patches
 COPY stubs stubs
-RUN npm install -g pnpm@11 && pnpm i --ignore-scripts --frozen-lockfile
+# Homelab: fetch packages via the LAN Verdaccio proxy-cache (storage-vm, HS-221) and keep
+# the pnpm store in a BuildKit cache mount so installs survive layer invalidation.
+# Override for a non-homelab build: --build-arg NPM_REGISTRY=https://registry.npmjs.org/
+ARG NPM_REGISTRY=http://192.168.1.64:4873/
+ENV npm_config_registry=${NPM_REGISTRY}
+RUN npm install -g pnpm@11
+RUN --mount=type=cache,id=pnpm-store,target=/pnpm-store \
+    pnpm config set store-dir /pnpm-store && pnpm i --ignore-scripts --frozen-lockfile
 COPY . .
 ARG BASE_URL
 ENV BASE_URL=${BASE_URL}
