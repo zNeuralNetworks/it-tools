@@ -3,6 +3,10 @@ FROM --platform=$BUILDPLATFORM node:24-alpine AS build-stage
 # Set environment variables for non-interactive npm installs
 ENV NPM_CONFIG_LOGLEVEL=warn
 ENV CI=true
+# Homelab: cap EVERY node process in the build (vue-tsc runs before set_node_mem.sh
+# exports its capped value — uncapped, typechecking 475 tools OOM-stormed two VMs
+# on 2026-07-16; set_node_mem.sh re-exports <=3GB for the vite phase itself).
+ENV NODE_OPTIONS=--max-old-space-size=3072
 
 RUN apk add --update python3 make g++\
    && rm -rf /var/cache/apk/*
