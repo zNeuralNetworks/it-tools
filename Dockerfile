@@ -14,9 +14,11 @@ COPY stubs stubs
 # Homelab: fetch packages via the LAN Verdaccio proxy-cache (storage-vm, HS-221) and keep
 # the pnpm store in a BuildKit cache mount so installs survive layer invalidation.
 # Override for a non-homelab build: --build-arg NPM_REGISTRY=https://registry.npmjs.org/
+# NOTE: pnpm 11 ignores the npm_config_registry ENV (verified 2026-07-16) — it must be
+# written to ~/.npmrc, which pnpm does read. The ENV still covers plain npm.
 ARG NPM_REGISTRY=http://192.168.1.64:4873/
 ENV npm_config_registry=${NPM_REGISTRY}
-RUN npm install -g pnpm@11
+RUN npm install -g pnpm@11 && echo "registry=${NPM_REGISTRY}" > /root/.npmrc
 RUN --mount=type=cache,id=pnpm-store,target=/pnpm-store \
     pnpm config set store-dir /pnpm-store && pnpm i --ignore-scripts --frozen-lockfile
 COPY . .
