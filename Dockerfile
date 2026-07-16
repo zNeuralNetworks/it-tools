@@ -22,9 +22,11 @@ COPY stubs stubs
 # written to ~/.npmrc, which pnpm does read. The ENV still covers plain npm.
 ARG NPM_REGISTRY=http://192.168.1.64:4873/
 ENV npm_config_registry=${NPM_REGISTRY}
+# No BuildKit store cache mount on purpose: cross-filesystem copies made linking
+# take hours (measured 2026-07-16); with the LAN Verdaccio warm, re-downloading is
+# minutes and same-fs hardlinking is instant.
 RUN npm install -g pnpm@11 && echo "registry=${NPM_REGISTRY}" > /root/.npmrc
-RUN --mount=type=cache,id=pnpm-store,target=/pnpm-store \
-    pnpm config set store-dir /pnpm-store && pnpm i --ignore-scripts --frozen-lockfile
+RUN pnpm i --ignore-scripts --frozen-lockfile
 COPY . .
 ARG BASE_URL
 ENV BASE_URL=${BASE_URL}
