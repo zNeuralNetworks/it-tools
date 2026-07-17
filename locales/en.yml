@@ -4643,6 +4643,18 @@ tools:
       label-dashboard-user-and-password: 'Dashboard User and Password:'
       placeholder-user-password: User:Password
       title-generated-compose-entry: Generated Compose Entry
+  ansible-memo:
+    title: Ansible Cheatsheet
+    description: Variable precedence, ad-hoc commands, vault workflow, ansible.cfg keys, AVD gotchas
+  jinja-filters-memo:
+    title: Jinja2 Filters Cheatsheet
+    description: Ansible Jinja2 filters — combine, selectattr, ipaddr, regex, loops, whitespace control
+  ansible-inventory-explorer:
+    title: Ansible Inventory Explorer
+    description: Convert INI/YAML inventories, visualize the group tree, and test host patterns (limit expressions)
+  jinja2-playground:
+    title: Jinja2 Playground
+    description: Render Jinja2-style templates against YAML context in the browser (nunjucks dialect)
   arista-eos-memo:
     title: Arista EOS Cheatsheet
     description: EOS CLI quick reference — config sessions, MLAG, BGP/EVPN/VXLAN show commands, eAPI
