@@ -4643,6 +4643,21 @@ tools:
       label-dashboard-user-and-password: 'Dashboard User and Password:'
       placeholder-user-password: User:Password
       title-generated-compose-entry: Generated Compose Entry
+  arista-eos-memo:
+    title: Arista EOS Cheatsheet
+    description: EOS CLI quick reference — config sessions, MLAG, BGP/EVPN/VXLAN show commands, eAPI
+  govc-esxi-memo:
+    title: govc / ESXi Cheatsheet
+    description: VMware ESXi automation with govc — power, OVA import, guest ops, cloud-init guestinfo
+  homelab-map-memo:
+    title: Homelab Map
+    description: Homelab VM, IP and service quick reference (no credentials)
+  ipv4-subnetting-memo:
+    title: IPv4 Subnetting Cheatsheet
+    description: CIDR prefix table, fast subnet math, reserved and special-use ranges
+  optics-memo:
+    title: Optics & Transceivers Cheatsheet
+    description: SFP/QSFP form factors, PMD reach tables, DAC vs AOC, DDM health checks
   vim-memo:
     title: VIM Cheatsheet
     description: Vim text editor commands
